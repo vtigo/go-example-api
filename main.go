@@ -5,9 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// We will be storing data in a slice for now. That means that data will be stored in memory and lost every time the program stops
+// We will be storing data in a slice for now. 
+// That means that data will be stored in memory and lost every time the program stops.
 
-// Struct tags such as json:"artist" specify what a field’s name should be when the struct’s contents are serialized into JSON. Without them, the JSON would use the struct’s capitalized field names – a style not as common in JSON
+// Struct tags such as json:"artist" specify what a field’s name should be when the struct’s contents are serialized into JSON.
+// Without them, the JSON would use the struct’s capitalized field names – a style not as common in JSON.
 type album struct {
 	ID     string `json:"id"`
 	Title  string `json:"title"`
@@ -23,17 +25,36 @@ var albums = []album{
 }
 
 func main() {
-	// Gin initializatin and route definitions
+	// Gin initializatin and route definitions.
 	router := gin.Default()
 	router.GET("/albums", getAlbums)
+	router.GET("/albums/:id", getAlbumById)
 	router.POST("/albums", postAlbums)
 
 	router.Run("localhost:8080")
 }
 
-// CRUD functions
+// CRUD API Handler Functions
+
+// The param of these functions is a pointer to gin Context. 
+// It carries request details, validates request data, and provides methods to send responses.
+
 func getAlbums(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, albums)
+}
+
+func getAlbumById(c *gin.Context) {
+	id := c.Param("id")
+	
+	// Loop through the albums slice to find the album with the respective id and return it if found
+	for _, a := range albums {
+		if a.ID == id {
+			c.IndentedJSON(http.StatusOK, a)
+			return
+		}
+	}
+
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
 }
 
 func postAlbums(c *gin.Context) {
